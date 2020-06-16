@@ -1,0 +1,50 @@
+Hello World!
+make CC=gcc CFLAGS="-Wall -O2" helloworld
+make CC=aarch64-linux-gnu-gcc CFLAGS="-Wall -O2" helloworld
+make CC=arm-linux-gnueabi-gcc CFLAGS="-Wall -O2" helloworld
+make CC=arm-linux-gnueabihf-gcc CFLAGS="-Wall -O2" helloworld
+
++---
+obj-m := kmalloc.o vmalloc.o vma_list.o
+
+KERNELDIR ?= /lib/modules/$(shell uname -r)/build
+
+all default: modules
+install: modules_install
+
+modules modules_install help clean:
+	$(MAKE) -C $(KERNELDIR) M=$(shell pwd) $@
+
+
++---
+ifndef KERNEL_DIR
+$(error KERNEL_DIR must be set in the command line)
+endif
+PWD := $(shell pwd)
+ARCH ?= arm64
+#ARCH ?= arm
+CROSS_COMPILE ?= aarch64-linux-gnu-
+#CROSS_COMPILE ?= arm-linux-gnueabi-
+#CROSS_COMPILE ?= arm-linux-gnueabihf-
+
+# This specifies the kernel module to be compiled
+obj-m := imx-sdma-scatter-gather.o imx-sdma-single.o
+
+#KERNELDIR ?= /lib/modules/$(shell uname -r)/build
+
+#all default: modules
+#install: modules_install
+
+#modules modules_install help clean:
+#	$(MAKE) -C $(KERNELDIR) M=$(shell pwd) $@
+
+# The default action
+all: modules
+
+# The main tasks
+modules clean:
+	make -C $(KERNEL_DIR) \
+            ARCH=$(ARCH) \
+            CROSS_COMPILE=$(CROSS_COMPILE) \
+            SUBDIRS=$(PWD) $@
++---
